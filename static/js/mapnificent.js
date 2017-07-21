@@ -405,12 +405,27 @@ Mapnificent.prototype.drawTile = function() {
     ctx.fillStyle = 'rgba(10,10,10,0.7)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // TODO figure out why this strategy fails on chrome
+    // limit drawing area to intersection of reachable points
+    for (var i = 1; i < self.positions.length; i ++) {
+      ctx.beginPath();
+      var drawStations = self.positions[i].getReachableStations(stationsAround, start, tileSize);
+      for (var j = 0; j < drawStations.length; j += 1) {
+        
+        ctx.moveTo(drawStations[j].x, drawStations[j].y);
+        ctx.arc(drawStations[j].x, drawStations[j].y,
+                drawStations[j].r, 0, 2 * Math.PI, false);
+        
+      }
+      ctx.clip();
+    }
+    
     // make every reachable point transparent
     ctx.globalCompositeOperation = 'destination-out';
     ctx.fillStyle = 'rgba(0,0,0,1)';
-
-    for (var i = 0; i < self.positions.length; i += 1) {
-      var drawStations = self.positions[i].getReachableStations(stationsAround, start, tileSize);
+    if (self.positions.length) {
+      var pos = self.positions[0];
+      var drawStations = pos.getReachableStations(stationsAround, start, tileSize);
       ctx.beginPath();
       for (var j = 0; j < drawStations.length; j += 1) {
         ctx.moveTo(drawStations[j].x, drawStations[j].y);
@@ -418,28 +433,6 @@ Mapnificent.prototype.drawTile = function() {
                 drawStations[j].r, 0, 2 * Math.PI, false);
         
       }
-      ctx.fill();
-    }
-    
-    // colore reachable points
-    // TODO only color the points that are reachable from every position
-    var colors = ['DarkOrange', 'DeepPink', 'DeepSkyBlue', 'FireBrick', 'Gold', 'GreenYellow']
-    
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = 0.3;
-
-    for (var i = 0; i < self.positions.length; i += 1) {
-      
-      ctx.beginPath();
-      var drawStations = self.positions[i].getReachableStations(stationsAround, start, tileSize);
-      for (var j = 0; j < drawStations.length; j += 1) {
-        
-        ctx.moveTo(drawStations[j].x, drawStations[j].y);
-        ctx.arc(drawStations[j].x, drawStations[j].y,
-                drawStations[j].r, 0, 2 * Math.PI, false);
-        
-      }
-      ctx.fillStyle = colors[i%colors.length];
       ctx.fill();
     }
   };
