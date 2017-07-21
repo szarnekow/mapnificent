@@ -8,7 +8,7 @@ function MapnificentPosition(mapnificent, latlng, time) {
   this.latlng = latlng;
   this.stationMap = null;
   this.progress = 0;
-  this.time = time === undefined ? 10 * 60 : 0;
+  this.time = time === undefined ? 45 * 60 : 0;
   this.init();
 }
 
@@ -399,21 +399,48 @@ Mapnificent.prototype.drawTile = function() {
 
     var stationsAround = self.quadtree.searchInRadius(latlng.lat, latlng.lng, searchRadius);
 
+    // darken the entire map
+    // TODO figure out, why this only works after a zoom gesture
     ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = 'rgba(50,50,50,0.4)';
+    ctx.fillStyle = 'rgba(10,10,10,0.7)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // make every reachable point transparent
     ctx.globalCompositeOperation = 'destination-out';
     ctx.fillStyle = 'rgba(0,0,0,1)';
 
     for (var i = 0; i < self.positions.length; i += 1) {
       var drawStations = self.positions[i].getReachableStations(stationsAround, start, tileSize);
+      ctx.beginPath();
       for (var j = 0; j < drawStations.length; j += 1) {
-        ctx.beginPath();
+        ctx.moveTo(drawStations[j].x, drawStations[j].y);
         ctx.arc(drawStations[j].x, drawStations[j].y,
                 drawStations[j].r, 0, 2 * Math.PI, false);
-        ctx.fill();
+        
       }
+      ctx.fill();
+    }
+    
+    // colore reachable points
+    // TODO only color the points that are reachable from every position
+    var colors = ['DarkOrange', 'DeepPink', 'DeepSkyBlue', 'FireBrick', 'Gold', 'GreenYellow']
+    
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 0.3;
+
+    for (var i = 0; i < self.positions.length; i += 1) {
+      
+      ctx.beginPath();
+      var drawStations = self.positions[i].getReachableStations(stationsAround, start, tileSize);
+      for (var j = 0; j < drawStations.length; j += 1) {
+        
+        ctx.moveTo(drawStations[j].x, drawStations[j].y);
+        ctx.arc(drawStations[j].x, drawStations[j].y,
+                drawStations[j].r, 0, 2 * Math.PI, false);
+        
+      }
+      ctx.fillStyle = colors[i%colors.length];
+      ctx.fill();
     }
   };
 };
