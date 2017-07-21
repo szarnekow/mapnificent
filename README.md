@@ -1,5 +1,6 @@
 # Mapnificent
 
+Make sure you have an up-to-date ruby version installed.
 Install [bower](http://bower.io/) and [jekyll](http://jekyllrb.com/).
 
     # You need node and npm
@@ -16,4 +17,4 @@ Then get the cities data:
 Then run:
 
     bower install
-    jekyll serve -w
+    bundle exec jekyll serve -w
